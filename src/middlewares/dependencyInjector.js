@@ -1,41 +1,43 @@
+const {
+  ProfileHandler,
+  LessonHandler,
+  ProblemHandler,
+} = require("../handlers");
+const {
+  UserRepository,
+  LessonRepository,
+  ProblemOptionRepository,
+  ProblemRepository
+} = require("../repositories");
+const { UserService, LessonService, ProblemService } = require("../services");
 
 function dependencyInjector() {
   return (req, res, next) => {
     const { db } = req.app.locals;
 
-    // const dataWilayahController = new DataWilayahController(
-    //   new DataWilayahService(new DataWilayahRepository(), db)
-    // );
+    const profileHandler = new ProfileHandler(
+      new UserService(new UserRepository(), db)
+    );
 
-    // const dataLingkunganController = new DataLingkunganController(
-    //   new DataLingkunganService(new DataLingkunganRepository(), db)
-    // );
+    const lessonHandler = new LessonHandler(
+      new LessonService(new LessonRepository(), db)
+    );
 
-    // const userController = new UserController(
-    //   new UserService(new UserRepository(), db)
-    // );
+    const problemHandler = new ProblemHandler(
+      new ProblemService(
+        {
+          problemOptionRepository: new ProblemOptionRepository(),
+          problemRepository: new ProblemRepository(),
+        },
+        db
+      )
+    );
 
-    // const transactionHistoryController = new TransactionHistoryController(
-    //   new TransactionHistoryService(new TransactionHistoryRepository(), db)
-    // );
-
-    // const dataKeluargaController = new DataKeluargaController(
-    //   new DataKeluargaService(new DataKeluargaRepository(), db)
-    // );
-
-    // const dataAnggotaController = new DataAnggotaController(
-    //   new DataAnggotaService(new DataAnggotaRepository(), db)
-    // );
-
-    // // simpan semua controller ke app.locals
-    // req.app.locals.controllers = {
-    //   dataWilayahController,
-    //   dataLingkunganController,
-    //   userController,
-    //   transactionHistoryController,
-    //   dataKeluargaController,
-    //   dataAnggotaController,
-    // };
+    req.app.locals.handlers = {
+      profileHandler,
+      lessonHandler,
+      problemHandler,
+    };
 
     next();
   };

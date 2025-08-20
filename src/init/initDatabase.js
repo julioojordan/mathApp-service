@@ -35,17 +35,10 @@ const initDatabase = async (logger) => {
     client.release();
     logger.info("PostgreSQL connected successfully");
 
-    process.on("SIGINT", async () => {
-      await pool.end();
-      logger.info("PostgreSQL pool closed");
-      process.exit(0);
-    });
-
     return pool;
   } catch (err) {
-    console.log(err)
-    logger.error("PostgreSQL connection failed:", err.message);
-    process.exit(1);
+    logger.error(err, "PostgreSQL connection failed");
+    throw err;
   }
 }
 
