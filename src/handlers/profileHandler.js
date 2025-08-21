@@ -13,7 +13,7 @@ class profileHandler {
         msg: "Fetching data User sukses",
         params: req.params,
       });
-      res.json({ code: 200, status: "Ok", data: dataUser });
+      res.json({ code: 200, status: "Ok", respoonse: dataUser });
     } catch (err) {
       return handleError(res, logger, err);
     }

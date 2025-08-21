@@ -51,8 +51,7 @@ class LessonRepository {
     }
   }
 
-  async findAll(idUser, client) {
-    // disini bisa di improve untuk set redis cache khusus untuk data id, title, created_at
+  async findAll(user_id, client) {
     try {
       const sql = `
       SELECT
@@ -68,7 +67,7 @@ class LessonRepository {
       ORDER BY a.id;
     `;
 
-      const { rows } = await client.query(sql, [idUser]);
+      const { rows } = await client.query(sql, [user_id]);
       return rows;
     } catch (error) {
       throw createHttpError(500, `Internal Server Error: ${error.message}`);

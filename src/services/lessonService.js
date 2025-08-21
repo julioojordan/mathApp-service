@@ -42,12 +42,12 @@ class LessonService {
     }
   }
 
-  async findAll(idUser) {
+  async findAll(user_id) {
     const client = await this.db.connect();
     try {
       await client.query("BEGIN");
 
-      const result = await this.repository.findAll(idUser, client);
+      const result = await this.repository.findAll(user_id, client);
 
       await client.query("COMMIT");
       return result;

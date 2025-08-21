@@ -1,8 +1,9 @@
 const handleError = require("../helpers/handleErrorHelper");
 
-const validateSchema = (schema) => {
+const validateSchema = (schema, type = "body") => {
   return (req, res, next) => {
-    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    const data = req[type];
+    const { error, value } = schema.validate(data, { abortEarly: false });
     const logger = req.app.locals.logger;
 
     if (error) {
@@ -16,7 +17,9 @@ const validateSchema = (schema) => {
       return handleError(res, logger, validationError);
     }
 
-    req.validated = value;
+    if (!req.validated) req.validated = {};
+    req.validated[type] = value;
+
     next();
   };
 };

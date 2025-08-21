@@ -15,7 +15,7 @@ class LessonHandler {
         params: req.params,
       });
 
-      res.json({ code: 200, status: "Ok", data: lesson });
+      res.json({ code: 200, status: "Ok", ressponse: lesson });
     } catch (err) {
       return handleError(res, logger, err);
     }
@@ -24,16 +24,16 @@ class LessonHandler {
   async findAll(req, res) {
     const logger = req.app.locals.logger;
     try {
-      const idUser = req.query.idUser;
+      const {user_id} = req.query;
 
-      if (typeof idUser !== "number" || isNaN(idUser)) {
-        return res.status(400).json({ error: "Invalid idUser" });
+      if (typeof user_id !== "number" || isNaN(user_id)) {
+        return res.status(400).json({ error: "Invalid user_id" });
       }
 
-      const lesson = await this.lessonService.findAll(idUser);
+      const lesson = await this.lessonService.findAll(user_id);
       logger.info("Fetching all lessons success");
 
-      res.json({ code: 200, status: "OK", data: lesson });
+      res.json({ code: 200, status: "OK", response: lesson });
     } catch (err) {
       return handleError(res, logger, err);
     }
@@ -44,12 +44,12 @@ class LessonHandler {
     try {
       const submission = await this.submissionService.submit(req);
       // to do benar kah ini kasih attempt-id
-      logger.info("Submmit lesson sukses", { data: req.body });
+      logger.info("Submmit lesson sukses", { ressponse: req.body });
       logger.info({
         msg: "Submission success",
-        data: req.body,
+        ressponse: req.body,
       });
-      res.json({ code: 200, status: "Ok", data: submission });
+      res.json({ code: 200, status: "Ok", ressponse: submission });
     } catch (err) {
       return handleError(res, logger, err);
     }
