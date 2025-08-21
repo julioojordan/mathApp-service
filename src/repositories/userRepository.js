@@ -39,7 +39,13 @@ class UserRepository {
     `;
 
       const { rows } = await client.query(sql, [user_id]);
-      return rows?.[0] || null;
+      if (!rows || rows.length === 0) {
+        throw createHttpError(404, {
+          error: "User Not Found",
+          message: `User ${user_id} not found`,
+        });
+      }
+      return rows?.[0];
     } catch (error) {
       if (error instanceof createHttpError.HttpError) throw error;
       throw createHttpError(500, `Internal Server Error: ${error.message}`);
@@ -50,19 +56,14 @@ class UserRepository {
     const { new_total_xp, current_streak, best_streak, user_id } = data;
     const { correct_count } = redisData;
 
-    const new_current_streak =
-      Number(current_streak) + Number(correct_count);
+    const new_current_streak = Number(current_streak) + Number(correct_count);
     const new_best_streak =
       new_current_streak > Number(best_streak)
         ? new_current_streak
         : Number(best_streak);
 
     try {
-      const fields = [
-        `exp = $1`,
-        `current_streak = $2`,
-        `best_streak = $3`,
-      ];
+      const fields = [`exp = $1`, `current_streak = $2`, `best_streak = $3`];
       const values = [
         Number(new_total_xp),
         new_current_streak,

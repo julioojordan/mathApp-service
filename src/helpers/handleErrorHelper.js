@@ -1,25 +1,26 @@
 const handleError = (res, logger, err) => {
   const status = err.status || 500;
-  const isCustom = !!err.status;
 
   logger.error(err, `Response: ${status} - ${err.message || "Unknown error"}`);
 
   return res.status(status).json({
     code: status,
-    status: getStatusMessage(status),
-    message: isCustom ? err.message : "Something went wrong",
+    error: err.error || getStatusMessage(status),
+    message: err.message || "Something went wrong"
   });
 };
 
 const getStatusMessage = (statusCode) => {
   const messages = {
-    400: "Bad Request",
+    400: "BadRequest",
     401: "Unauthorized",
     403: "Forbidden",
-    404: "Not Found",
-    500: "Internal Server Error",
+    404: "NotFound",
+    409: "Conflict",
+    422: "UnprocessableEntity",
+    500: "InternalServerError",
   };
-  return messages[statusCode] || "Unknown Error";
+  return messages[statusCode] || "UnknownError";
 };
 
 module.exports = handleError;
