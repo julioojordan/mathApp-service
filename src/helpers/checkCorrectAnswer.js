@@ -34,7 +34,7 @@ const checkCorrectAnswer = async (redis, lesson_id, data, logger) => {
         actual_lesson_id: lesson_id,
         problem_id: data.problem_id,
       });
-      throw createError(409, "Mismatch between provided lesson_id and cached lesson_id.");
+      throw createError(400, "Mismatch between provided lesson_id and cached lesson_id.");
     }
 
     const type = hash.type;

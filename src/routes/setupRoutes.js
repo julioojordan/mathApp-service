@@ -32,10 +32,13 @@ const setupRoutes = (app, logger) => {
     }
   });
 
+  // to do ini perlu tambahkan validate query sepertinya
   app.post(
     "/api/lessons/:id/submit",
     validateSchema(submitSchema),
+    castIdToInt,
     async (req, res) => {
+      // ada query param : current streak, exp, lesson_progress (ini global ya bukan 1 per 1 ?), lesson_id
       try {
         const { attempt_id, answers } = req.validated;
         const { lessonHandler } = req.app.locals.handlers;

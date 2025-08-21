@@ -3,6 +3,7 @@ const {
   updateUserProgress,
   cacheTotalProblem,
   cacheCorrectAnswer,
+  getIsCorrect,
 } = require("../helpers");
 
 class ProblemService {
@@ -49,17 +50,20 @@ class ProblemService {
         );
 
         //check is correct
-        const correctOptionIds = correctAnswer.map((opt) => String(opt.id));
-        const userOptionId = String(body.option_id);
-
-        is_correct = correctOptionIds.includes(userOptionId);
-        exp = is_correct ? correctAnswer[0]?.exp : 0;
+        const questionType = correctAnswer[0]?.type || "multiple";
+        is_correct = getIsCorrect(
+          questionType,
+          correctAnswer,
+          body
+        );
+        exp = is_correct ? correctAnswer[0]?.exp || 0 : 0;
+        exp = parseInt(exp);
       } else {
         const totalStr = await redis.get(`lesson:totalProblem:${lesson_id}`);
         totalProblem = parseInt(totalStr) || 1;
       }
-      console.log;
-      await updateUserProgress(
+
+      const { attempt_id } = await updateUserProgress(
         redis,
         {
           user_id: body.user_id,
@@ -67,11 +71,12 @@ class ProblemService {
           is_correct,
           exp,
           problem_id: body.problem_id,
+          request_body: body,
         },
         totalProblem,
         logger
       );
-      return { is_correct, exp };
+      return { is_correct, exp, attempt_id };
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;

@@ -7,21 +7,33 @@ const {
   UserRepository,
   LessonRepository,
   ProblemOptionRepository,
-  ProblemRepository
+  ProblemRepository,
+  SubmissionRepository,
+  UserProgressRepository
 } = require("../repositories");
-const { UserService, LessonService, ProblemService } = require("../services");
+const {
+  ProfileService,
+  LessonService,
+  ProblemService,
+  SubmissionService,
+} = require("../services");
 
 function dependencyInjector() {
   return (req, res, next) => {
     const { db } = req.app.locals;
 
     const profileHandler = new ProfileHandler(
-      new UserService(new UserRepository(), db)
+      new ProfileService(new UserRepository(), db)
     );
 
-    const lessonHandler = new LessonHandler(
-      new LessonService(new LessonRepository(), db)
-    );
+    const lessonHandler = new LessonHandler({
+      lessonService: new LessonService(new LessonRepository(), db),
+      submissionService: new SubmissionService({
+        userProgressRepository: new UserProgressRepository(),
+        submissionRepository: new SubmissionRepository(),
+        userRepository: new UserRepository()
+      }, db)
+    });
 
     const problemHandler = new ProblemHandler(
       new ProblemService(

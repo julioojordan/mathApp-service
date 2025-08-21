@@ -21,14 +21,21 @@ class ProblemOptionRepository {
       WHERE b.id = $1`;
 
       const { rows } = await client.query(sql, [problem_id]);
-      return rows || null;
+
+      //check if problem really exist
+      if (!rows || rows.length === 0) {
+        throw createHttpError(422, {
+          error: "InvalidProblem",
+          message: `Problem ${problem_id} not found`,
+        });
+      }
+
+      return rows
     } catch (error) {
       if (error instanceof createHttpError.HttpError) throw error;
       throw createHttpError(500, `Internal Server Error: ${error.message}`);
     }
   }
-
-
 }
 
 module.exports = ProblemOptionRepository;

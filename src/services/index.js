@@ -1,9 +1,11 @@
 const LessonService = require("./lessonService");
-const UserService = require("./userService");
+const ProfileService = require("./profileService");
 const ProblemService = require("./problemService");
+const SubmissionService = require("./submissionService");
 
 module.exports = {
   LessonService,
-  UserService,
+  ProfileService,
   ProblemService,
+  SubmissionService,
 };

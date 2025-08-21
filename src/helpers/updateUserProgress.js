@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const updateUserProgress = async (
   redis,
-  { user_id, lesson_id, is_correct, exp, problem_id },
+  { user_id, lesson_id, is_correct, exp, problem_id, request_body },
   totalProblem,
   logger
 ) => {
@@ -11,19 +11,44 @@ const updateUserProgress = async (
   let attempt_id;
 
   try {
+    // check if already answered
     const alreadyAnswered = await redis.exists(userAnswerKey);
     if (alreadyAnswered) {
       logger.info({
         msg: "[Redis] Question already answered by user. Skipping update.",
         user_id,
         lesson_id,
-        problem_id: problem_id,
+        problem_id,
       });
       return { attempt_id: await redis.hget(progressKey, "attempt_id") };
     }
     await redis.set(userAnswerKey, 1);
 
     const exists = await redis.exists(progressKey);
+
+    // take old meta
+    let currentMeta = [];
+    const existingMetaStr = await redis.hget(progressKey, "meta_json");
+    if (existingMetaStr) {
+      try {
+        currentMeta = JSON.parse(existingMetaStr);
+        if (!Array.isArray(currentMeta)) currentMeta = [];
+      } catch (err) {
+        logger.warn("[Redis] Failed to parse existing meta_json, reset to empty array");
+        currentMeta = [];
+      }
+    }
+
+    //  add new meta
+    currentMeta.push({
+      ...request_body,
+      is_correct,
+      exp : is_correct ? exp : 0,
+      timestamp: new Date().toISOString()
+    });
+
+    // stringify meta
+    const updatedMetaStr = JSON.stringify(currentMeta);
 
     if (!exists) {
       attempt_id = uuidv4();
@@ -32,6 +57,7 @@ const updateUserProgress = async (
         count: 1,
         correct_count: is_correct ? 1 : 0,
         earned_exp: is_correct ? exp : 0,
+        meta_json: updatedMetaStr,
       });
 
       logger.info({
@@ -48,6 +74,8 @@ const updateUserProgress = async (
         await redis.hincrby(progressKey, "correct_count", 1);
         await redis.hincrby(progressKey, "earned_exp", exp);
       }
+
+      await redis.hset(progressKey, "meta_json", updatedMetaStr);
 
       attempt_id = await redis.hget(progressKey, "attempt_id");
 

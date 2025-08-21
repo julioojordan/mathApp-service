@@ -1,17 +1,20 @@
 const handleError = require("../helpers/handleErrorHelper");
 
 class LessonHandler {
-  constructor(lessonService) {
-    this.lessonService = lessonService;
+  constructor(services) {
+    this.lessonService = services.lessonService;
+    this.submissionService = services.submissionService;
   }
 
   async fetchLesson(req, res) {
     const logger = req.app.locals.logger;
     try {
       const lesson = await this.lessonService.fetchLesson(req);
-      logger.info("Fetching lesson with problem success", {
+      logger.info({
+        msg: "Fetching lesson with problem success",
         params: req.params,
       });
+
       res.json({ code: 200, status: "Ok", data: lesson });
     } catch (err) {
       return handleError(res, logger, err);
@@ -36,13 +39,17 @@ class LessonHandler {
     }
   }
 
-  async add(req, res) {
+  async submit(req, res) {
     const logger = req.app.locals.logger;
     try {
-      const lesson = await this.lessonService.add(req.body);
+      const submission = await this.submissionService.submit(req);
       // to do benar kah ini kasih attempt-id
       logger.info("Submmit lesson sukses", { data: req.body });
-      res.json({ code: 200, status: "Ok", data: lesson });
+      logger.info({
+        msg: "Submission success",
+        data: req.body,
+      });
+      res.json({ code: 200, status: "Ok", data: submission });
     } catch (err) {
       return handleError(res, logger, err);
     }
