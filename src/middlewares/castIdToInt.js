@@ -4,7 +4,6 @@ const castIdToInt = (req, res, next) => {
 
     for (const key in obj) {
       if (/id/i.test(key)) {
-        // 'id' case-insensitive
         const parsed = parseInt(obj[key], 10);
         if (!isNaN(parsed)) {
           obj[key] = parsed;

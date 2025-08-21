@@ -39,7 +39,6 @@ class LessonService {
           logger
         );
 
-        // delete is_correct from result
         result.problems = result.problems.map((p) => ({
           ...p,
           options: (p.options || []).map(({ is_correct, ...rest }) => rest),

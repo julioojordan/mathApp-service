@@ -48,9 +48,7 @@ class SubmissionService {
         progress = Math.min(1, Math.max(0, progress / 100));
       }
 
-      // begin adding data to db
       await client.query("BEGIN");
-      //should check if user_id already have submmision on corresponce lesson
       const isAlreadySubmit = await this.userProgressRepository.isProgressExist(
         client,
         user_id,

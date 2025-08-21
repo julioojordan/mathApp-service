@@ -10,7 +10,6 @@ class UserProgressRepository {
     const progressValue = Math.min(1, parseFloat(lesson_progress) / 100);
 
     try {
-      // TO DO ON CLONFLICT if ada yang user_id dan lesson_id sama di update saja
       const sql = `
         INSERT INTO user_progress (
           user_id, lesson_id, completed, lesson_progress, earned_exp, meta_json

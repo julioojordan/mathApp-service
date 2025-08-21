@@ -43,7 +43,6 @@ class LessonHandler {
     const logger = req.app.locals.logger;
     try {
       const submission = await this.submissionService.submit(req);
-      // to do benar kah ini kasih attempt-id
       logger.info("Submmit lesson sukses", { response: req.body });
       logger.info({
         msg: "Submission success",

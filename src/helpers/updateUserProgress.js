@@ -25,7 +25,6 @@ const updateUserProgress = async (
 
     const exists = await redis.exists(progressKey);
 
-    // take old meta
     let currentMeta = [];
     const existingMetaStr = await redis.hget(progressKey, "meta_json");
     if (existingMetaStr) {
@@ -38,7 +37,6 @@ const updateUserProgress = async (
       }
     }
 
-    //  add new meta
     currentMeta.push({
       ...request_body,
       is_correct,

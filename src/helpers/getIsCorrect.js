@@ -20,7 +20,6 @@ const getIsCorrect = (
     return correctLabels.includes(userAnswer);
   }
 
-  // fallback: unrecognized type
   return false;
 };
 
