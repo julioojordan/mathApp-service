@@ -1,4 +1,3 @@
-require("dotenv").config();
 const pino = require("pino");
 
 const redactPathDefault = [

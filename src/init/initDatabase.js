@@ -1,14 +1,13 @@
-require("dotenv").config();
 const { Pool } = require("pg");
 
 const initDatabase = async (logger) => {
   try {
     const {
-      DB_HOST = "localhost",
+      DB_HOST,
       DB_PORT = "5432",
-      DB_USER = "postgres",
-      DB_PASSWORD = "root",
-      DB_NAME = "math_app",
+      DB_USER,
+      DB_PASSWORD,
+      DB_NAME,
       DB_MAX_CONNS = "50",
       DB_IDLE_TIMEOUT_MS = "30000",
       DB_CONN_TIMEOUT_MS = "5000",

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const { initDatabase, initLogger, initRedisClient } = require("./init");
 const { dependencyInjector } = require("./middlewares");
