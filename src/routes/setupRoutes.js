@@ -53,7 +53,6 @@ const setupRoutes = (app, logger) => {
     }
   );
 
-  // to do ini perlu tambahkan validate query sepertinya
   app.post(
     "/api/lessons/:id/submit",
     validateSchema(paramsIdSchema, "params"),

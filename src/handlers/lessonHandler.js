@@ -15,7 +15,7 @@ class LessonHandler {
         params: req.params,
       });
 
-      res.json({ code: 200, status: "Ok", ressponse: lesson });
+      res.json({ code: 200, status: "Ok", response: lesson });
     } catch (err) {
       return handleError(res, logger, err);
     }
@@ -44,12 +44,12 @@ class LessonHandler {
     try {
       const submission = await this.submissionService.submit(req);
       // to do benar kah ini kasih attempt-id
-      logger.info("Submmit lesson sukses", { ressponse: req.body });
+      logger.info("Submmit lesson sukses", { response: req.body });
       logger.info({
         msg: "Submission success",
-        ressponse: req.body,
+        response: req.body,
       });
-      res.json({ code: 200, status: "Ok", ressponse: submission });
+      res.json({ code: 200, status: "Ok", response: submission });
     } catch (err) {
       return handleError(res, logger, err);
     }

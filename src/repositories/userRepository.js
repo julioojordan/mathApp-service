@@ -104,6 +104,30 @@ class UserRepository {
       );
     }
   }
+  async updateCurrentStreak(client, user_id, streak) {
+    try {
+      const sql = `
+      UPDATE users
+      SET
+        current_streak = $2
+      WHERE id = $1
+      RETURNING id, current_streak, best_streak, last_streak
+    `;
+
+      const { rows } = await client.query(sql, [user_id, streak]);
+      if (!rows || rows.length === 0) {
+        throw createHttpError(404, {
+          error: "User Not Found",
+          message: `User ${user_id} not found, update failed`,
+        });
+      }
+
+      return rows[0];
+    } catch (error) {
+      if (error instanceof createHttpError.HttpError) throw error;
+      throw createHttpError(500, `Internal Server Error: ${error.message}`);
+    }
+  }
 }
 
 module.exports = UserRepository;
