@@ -6,6 +6,7 @@ const cacheTotalProblem = require("./cacheTotalProblem");
 const validateAnswer = require("./validateAnswer");
 const getIsCorrect = require("./getIsCorrect");
 const hasPassedDaysSinceUTC = require("./hasPassedDaysSinceUTC");
+const deleteUserProgress = require("./deleteUserProgress")
 
 module.exports = {
   checkCorrectAnswer,
@@ -15,5 +16,6 @@ module.exports = {
   cacheCorrectAnswers,
   validateAnswer,
   getIsCorrect,
-  hasPassedDaysSinceUTC
+  hasPassedDaysSinceUTC,
+  deleteUserProgress
 };

@@ -11,7 +11,6 @@ const updateUserProgress = async (
   let attempt_id;
 
   try {
-    // check if already answered
     const alreadyAnswered = await redis.exists(userAnswerKey);
     if (alreadyAnswered) {
       logger.info({
@@ -46,8 +45,6 @@ const updateUserProgress = async (
       exp : is_correct ? exp : 0,
       timestamp: new Date().toISOString()
     });
-
-    // stringify meta
     const updatedMetaStr = JSON.stringify(currentMeta);
 
     if (!exists) {

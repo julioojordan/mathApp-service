@@ -27,6 +27,7 @@ const setupRoutes = (app, logger) => {
   app.get(
     "/api/lesson/:id",
     castIdToInt,
+    validateSchema(lessonQuerySchema, "query"),
     validateSchema(paramsIdSchema, "params"),
     async (req, res) => {
       try {

@@ -1,5 +1,5 @@
 const createHttpError = require("http-errors");
-const { validateAnswer } = require("../helpers");
+const { validateAnswer, deleteUserProgress } = require("../helpers");
 
 class SubmissionService {
   constructor(repository, db) {
@@ -12,11 +12,10 @@ class SubmissionService {
   async submit(req) {
     const client = await this.db.connect();
     const { current_streak, best_streak, exp, user_id } = req.query;
-    const lesson_id = req.params.id
-    const { redis } = req.app.locals;
+    const lesson_id = req.params.id;
+    const { redis, logger } = req.app.locals;
     const progressKey = `attempt:${user_id}:${lesson_id}`;
     try {
-      // get data from redis
       const progressData = await redis.hgetall(progressKey);
       if (
         !progressData.attempt_id ||
@@ -25,7 +24,7 @@ class SubmissionService {
         throw createHttpError(409, "Invalid or mismatched attempt_id.");
       }
 
-      //get meta data from redis -> to cross check jawaban
+      //get meta data from redis -> to cross check answer
       const metaStr = await redis.hget(progressKey, "meta_json");
       let meta_json;
       try {
@@ -42,8 +41,36 @@ class SubmissionService {
         });
       }
 
+      let progress = parseFloat(progressData.lesson_progress);
+      if (isNaN(progress)) {
+        progress = 0;
+      } else {
+        progress = Math.min(1, Math.max(0, progress / 100));
+      }
+
       // begin adding data to db
       await client.query("BEGIN");
+      //should check if user_id already have submmision on corresponce lesson
+      const isAlreadySubmit = await this.userProgressRepository.isProgressExist(
+        client,
+        user_id,
+        lesson_id
+      );
+      if (isAlreadySubmit) {
+        logger.info("User already submitted !")
+        await deleteUserProgress(redis, user_id, lesson_id, logger);
+        return {
+          correct_count: parseInt(progressData.correct_count),
+          earned_exp: 0,
+          new_total_xp: exp,
+          streak: {
+            current: current_streak,
+            best: best_streak,
+          },
+          lesson_progress: progress,
+          is_already_submit: isAlreadySubmit,
+        };
+      }
       await this.submissionRepository.insertSubmission(client, {
         user_id,
         lesson_id,
@@ -59,7 +86,6 @@ class SubmissionService {
         progressData
       );
 
-      //TO DO update user streak dll
       const new_total_xp = Number(progressData.earned_exp) + Number(exp);
       const resUpdate = await this.userRepository.updateUser(
         client,
@@ -72,15 +98,8 @@ class SubmissionService {
         progressData
       );
 
-      // parse progress
-      let progress = parseFloat(progressData.lesson_progress);
-      if (isNaN(progress)) {
-        progress = 0;
-      } else {
-        progress = Math.min(1, Math.max(0, progress / 100));
-      }
-
       await client.query("COMMIT");
+      await deleteUserProgress(redis, user_id, lesson_id, logger);
       return {
         correct_count: parseInt(progressData.correct_count),
         earned_exp: parseInt(progressData.earned_exp),

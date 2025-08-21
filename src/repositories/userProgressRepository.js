@@ -45,6 +45,31 @@ class UserProgressRepository {
       throw createHttpError(500, `Internal Server Error: ${error.message}`);
     }
   }
+
+  async isProgressExist(client, user_id, lesson_id) {
+    try {
+      const sql = `
+      SELECT COUNT(*) AS total
+      FROM user_progress
+      WHERE user_id = $1 AND lesson_id = $2
+    `;
+
+      const { rows } = await client.query(sql, [user_id, lesson_id]);
+
+      if (!rows || rows.length === 0) {
+        throw createHttpError(500, {
+          error: "Unexpected Error",
+          message: "Failed to count progress data",
+        });
+      }
+
+      const total = Number(rows[0].total || 0);
+      return total >= 1;
+    } catch (error) {
+      if (error instanceof createHttpError.HttpError) throw error;
+      throw createHttpError(500, `Internal Server Error: ${error.message}`);
+    }
+  }
 }
 
 module.exports = UserProgressRepository;
