@@ -1,5 +1,5 @@
 const createHttpError = require("http-errors");
-const { validateAnswer, deleteUserProgress } = require("../helpers");
+const { validateAnswer, deleteUserProgress, hasPassedDaysSinceUTC } = require("../helpers");
 
 class SubmissionService {
   constructor(repository, db) {
@@ -55,8 +55,7 @@ class SubmissionService {
         lesson_id
       );
       if (isAlreadySubmit) {
-        logger.info("User already submitted !")
-        await deleteUserProgress(redis, user_id, lesson_id, logger);
+        logger.info("User already submitted !");
         return {
           correct_count: parseInt(progressData.correct_count),
           earned_exp: 0,
@@ -85,6 +84,16 @@ class SubmissionService {
       );
 
       const new_total_xp = Number(progressData.earned_exp) + Number(exp);
+      const userData = await this.userRepository.getUserProfileStats(
+        client,
+        user_id
+      );
+
+      const canAddStreak =
+        hasPassedDaysSinceUTC(userData.last_streak, 1) === true &&
+        hasPassedDaysSinceUTC(userData.last_streak, 2) === false;
+        
+      console.log(canAddStreak)
       const resUpdate = await this.userRepository.updateUser(
         client,
         {
@@ -93,11 +102,11 @@ class SubmissionService {
           new_total_xp,
           user_id,
         },
-        progressData
+        progressData,
+        canAddStreak
       );
 
       await client.query("COMMIT");
-      await deleteUserProgress(redis, user_id, lesson_id, logger);
       return {
         correct_count: parseInt(progressData.correct_count),
         earned_exp: parseInt(progressData.earned_exp),
@@ -113,6 +122,7 @@ class SubmissionService {
       throw error;
     } finally {
       client.release();
+      await deleteUserProgress(redis, user_id, lesson_id, logger);
     }
   }
 }

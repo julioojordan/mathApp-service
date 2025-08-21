@@ -16,7 +16,7 @@ class ProfileService {
 
       const streakExpired = hasPassedDaysSinceUTC(result.last_streak, 1);
 
-      if (streakExpired) {
+      if (streakExpired && result.current_streak > 0) {
         logger.info("Streak Expired");
         logger.info({
           msg: "Updating Streak User",

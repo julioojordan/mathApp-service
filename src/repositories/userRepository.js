@@ -52,11 +52,12 @@ class UserRepository {
     }
   }
 
-  async updateUser(client, data, redisData) {
+  async updateUser(client, data, redisData, canAddStreak) {
     const { new_total_xp, current_streak, best_streak, user_id } = data;
     const { correct_count } = redisData;
+    const added_streak = canAddStreak && Number(correct_count) >= 1 ? 1 : 0;
 
-    const new_current_streak = Number(current_streak) + Number(correct_count);
+    const new_current_streak = Number(current_streak) + added_streak;
     const new_best_streak =
       new_current_streak > Number(best_streak)
         ? new_current_streak
@@ -70,10 +71,10 @@ class UserRepository {
         new_best_streak,
       ];
 
-      if (correct_count >= 1) {
-        fields.splice(3, 0, `last_streak = NOW()`);
+      if (canAddStreak && Number(correct_count) >= 1) {
+        fields.push(`last_streak = NOW()`);
       }
-
+      
       values.push(user_id);
 
       const updateSql = `
